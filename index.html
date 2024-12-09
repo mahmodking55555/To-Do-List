@@ -4,18 +4,141 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To-Do List with Firebase</title>
-    <script type="module" src="app.js" defer></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.17.2/firebase-database.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 90%;
+            max-width: 500px;
+            margin: 50px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #28a745;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background: #f9f9f9;
+            margin: 5px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        li button {
+            width: auto;
+            padding: 5px 10px;
+        }
+    </style>
 </head>
-<body class="bg-light">
-    <div class="container mt-5">
-        <h1 class="text-center mb-4">To-Do List with Firebase</h1>
-        <div class="mb-3">
-            <input id="taskInput" type="text" class="form-control" placeholder="Enter a task">
-        </div>
-        <button id="addTaskBtn" class="btn btn-primary w-100 mb-4">Add Task</button>
-        <h3>Tasks:</h3>
-        <ul id="tasksList" class="list-group"></ul>
+<body>
+    <div class="container">
+        <h1>To-Do List</h1>
+        <input type="text" id="taskInput" placeholder="Enter a new task">
+        <button id="addTaskBtn">Add Task</button>
+        <ul id="taskList"></ul>
     </div>
+
+    <script type="module">
+        // Firebase configuration
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-app.js";
+        import { getDatabase, ref, set, get, child, update, remove } from "https://www.gstatic.com/firebasejs/9.17.2/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDG3jlAYXa6A1VYGwmg_VESPgyxNwP7fWk",
+            authDomain: "to-do-list-78613.firebaseapp.com",
+            databaseURL: "https://to-do-list-78613-default-rtdb.firebaseio.com",
+            projectId: "to-do-list-78613",
+            storageBucket: "to-do-list-78613.appspot.com",
+            messagingSenderId: "770170760313",
+            appId: "1:770170760313:web:1cae8a9a79aeccdc01f8a8",
+            measurementId: "G-CES37GXLP0"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // DOM elements
+        const taskInput = document.getElementById("taskInput");
+        const addTaskBtn = document.getElementById("addTaskBtn");
+        const taskList = document.getElementById("taskList");
+
+        // Add a task
+        addTaskBtn.addEventListener("click", () => {
+            const task = taskInput.value.trim();
+            if (task) {
+                const taskId = new Date().getTime().toString();
+                set(ref(database, "tasks/" + taskId), { name: task })
+                    .then(() => {
+                        taskInput.value = "";
+                        loadTasks();
+                    })
+                    .catch((error) => console.error("Error adding task:", error));
+            }
+        });
+
+        // Load tasks
+        function loadTasks() {
+            const dbRef = ref(database);
+            get(child(dbRef, "tasks"))
+                .then((snapshot) => {
+                    taskList.innerHTML = "";
+                    if (snapshot.exists()) {
+                        const tasks = snapshot.val();
+                        for (let id in tasks) {
+                            const li = document.createElement("li");
+                            li.innerHTML = `
+                                ${tasks[id].name}
+                                <button onclick="deleteTask('${id}')">Delete</button>
+                            `;
+                            taskList.appendChild(li);
+                        }
+                    } else {
+                        taskList.innerHTML = "<p>No tasks found.</p>";
+                    }
+                })
+                .catch((error) => console.error("Error loading tasks:", error));
+        }
+
+        // Delete a task
+        window.deleteTask = (taskId) => {
+            remove(ref(database, "tasks/" + taskId))
+                .then(() => loadTasks())
+                .catch((error) => console.error("Error deleting task:", error));
+        };
+
+        // Initial load
+        loadTasks();
+    </script>
 </body>
 </html>
