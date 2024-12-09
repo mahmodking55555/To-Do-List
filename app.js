@@ -1,18 +1,14 @@
-
-// Import the functions you need from the SDKs you need
+// Import the necessary functions from Firebase SDK
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { getDatabase, ref, set, get, child, update, remove } from "firebase/database";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Firebase configuration for your web app
 const firebaseConfig = {
   apiKey: "AIzaSyDG3jlAYXa6A1VYGwmg_VESPgyxNwP7fWk",
   authDomain: "to-do-list-78613.firebaseapp.com",
   databaseURL: "https://to-do-list-78613-default-rtdb.firebaseio.com",
   projectId: "to-do-list-78613",
-  storageBucket: "to-do-list-78613.firebasestorage.app",
+  storageBucket: "to-do-list-78613.appspot.com", // يجب تصحيح الرابط هنا
   messagingSenderId: "770170760313",
   appId: "1:770170760313:web:1cae8a9a79aeccdc01f8a8",
   measurementId: "G-CES37GXLP0"
@@ -20,59 +16,61 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 
-// العناصر في واجهة المستخدم
-const taskInput = document.getElementById("taskInput");
-const addTaskBtn = document.getElementById("addTaskBtn");
-const tasksList = document.getElementById("tasksList");
+// Initialize Realtime Database
+const database = getDatabase(app);
 
-// وظيفة إضافة مهمة جديدة
-async function addTask() {
-    const taskText = taskInput.value.trim();
-    if (taskText) {
-        try {
-            await addDoc(collection(db, "tasks"), { text: taskText });
-            taskInput.value = "";
-            loadTasks();
-        } catch (error) {
-            console.error("Error adding task: ", error);
-        }
-    }
-}
-
-// وظيفة حذف مهمة
-async function deleteTask(taskId) {
-    try {
-        await deleteDoc(doc(db, "tasks", taskId));
-        loadTasks();
-    } catch (error) {
-        console.error("Error deleting task: ", error);
-    }
-}
-
-// وظيفة جلب المهام وعرضها
-async function loadTasks() {
-    tasksList.innerHTML = "";
-    try {
-        const querySnapshot = await getDocs(collection(db, "tasks"));
-        querySnapshot.forEach((doc) => {
-            const task = doc.data();
-            const listItem = document.createElement("li");
-            listItem.className = "list-group-item d-flex justify-content-between align-items-center";
-            listItem.innerHTML = `
-                ${task.text}
-                <button class="btn btn-danger btn-sm" onclick="deleteTask('${doc.id}')">Delete</button>
-            `;
-            tasksList.appendChild(listItem);
+// Example: Function to add a task to the database
+function addTask(taskId, taskData) {
+    set(ref(database, "tasks/" + taskId), taskData)
+        .then(() => {
+            console.log("Task added successfully!");
+        })
+        .catch((error) => {
+            console.error("Error adding task:", error);
         });
-    } catch (error) {
-        console.error("Error fetching tasks: ", error);
-    }
 }
 
-// إضافة حدث للنقر على زر إضافة مهمة
-addTaskBtn.addEventListener("click", addTask);
+// Example: Function to retrieve tasks
+function getTasks() {
+    const dbRef = ref(database);
+    get(child(dbRef, "tasks"))
+        .then((snapshot) => {
+            if (snapshot.exists()) {
+                console.log("Tasks:", snapshot.val());
+            } else {
+                console.log("No data available");
+            }
+        })
+        .catch((error) => {
+            console.error("Error retrieving tasks:", error);
+        });
+}
 
-// تحميل المهام عند فتح الصفحة
-loadTasks();
+// Example: Function to update a task
+function updateTask(taskId, updatedData) {
+    update(ref(database, "tasks/" + taskId), updatedData)
+        .then(() => {
+            console.log("Task updated successfully!");
+        })
+        .catch((error) => {
+            console.error("Error updating task:", error);
+        });
+}
+
+// Example: Function to delete a task
+function deleteTask(taskId) {
+    remove(ref(database, "tasks/" + taskId))
+        .then(() => {
+            console.log("Task deleted successfully!");
+        })
+        .catch((error) => {
+            console.error("Error deleting task:", error);
+        });
+}
+
+// Test the functions
+addTask("task1", { name: "Learn Firebase", completed: false });
+getTasks();
+updateTask("task1", { completed: true });
+deleteTask("task1");
