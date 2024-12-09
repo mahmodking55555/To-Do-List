@@ -1,21 +1,26 @@
-// استيراد مكتبات Firebase
-// استيراد مكتبات Firebase
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
 
-// إعداد Firebase
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDG3jlAYXa6A1VYGwmg_VESPgyxNwP7fWk",
+  authDomain: "to-do-list-78613.firebaseapp.com",
+  databaseURL: "https://to-do-list-78613-default-rtdb.firebaseio.com",
+  projectId: "to-do-list-78613",
+  storageBucket: "to-do-list-78613.firebasestorage.app",
+  messagingSenderId: "770170760313",
+  appId: "1:770170760313:web:1cae8a9a79aeccdc01f8a8",
+  measurementId: "G-CES37GXLP0"
 };
 
-// تهيئة التطبيق وقاعدة البيانات
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const analytics = getAnalytics(app);
 
 // العناصر في واجهة المستخدم
 const taskInput = document.getElementById("taskInput");
